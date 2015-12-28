@@ -234,7 +234,7 @@ class JohnnyCache {
 
 		// Attempt to output the server contents
 		if ( ! empty( $_POST['name'] ) ) {
-			$this->do_instance( $_POST['name'] );
+			$this->do_rows( $_POST['name'] );
 		}
 
 		exit();
