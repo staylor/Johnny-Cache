@@ -7,7 +7,7 @@ Stable tag: 2.0.0
 
 == Description ==
 
-Provides an admin interface for inspecting Memcached instances and flushing items by key or group in an AJAX fashion. This should be considered a pre-release beta be-super-careful-when-using-type release.
+Provides an admin interface for inspecting Memcached instances, and flushing items (by key or group).
 
 == Installation ==
 
