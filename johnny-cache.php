@@ -1,22 +1,75 @@
 <?php
-/*
-Plugin Name: Johnny Cache
-Plugin URI: http://emusic.com
-Author: Scott Taylor ( wonderboymusic )
-Description: UI for managing Batcache / Memcached WP Object Cache backend
-Author URI: http://scotty-t.com
-Version: 0.3
+
+/**
+ * Plugin Name: Johnny Cache
+ * Plugin URI:  http://emusic.com
+ * Author:      Scott Taylor ( wonderboymusic )
+ * Description: UI for managing Batcache / Memcached WP Object Cache backend
+ * Author URI:  http://scotty-t.com
+ * Version:     2.0.0
 */
 
 class JohnnyCache {
+
+	/**
+	 * The URL used for assets
+	 *
+	 * @since 2.0.0
+	 *
+	 * @var string
+	 */
 	private $url     = '';
+
+	/**
+	 * The version used for assets
+	 *
+	 * @since 2.0.0
+	 *
+	 * @var string
+	 */
 	private $version = '201512250001';
 
+	/**
+	 * Nonce ID for getting the Memcached instance
+	 *
+	 * @since 2.0.0
+	 *
+	 * @var string
+	 */
     public $get_instance_nonce = 'jc-get_instance';
-    public $remove_item_nonce  = 'jc-remove_item';
-    public $flush_group_nonce  = 'jc-flush_group';
-    public $get_item_nonce     = 'jc-get_item';
 
+	/**
+	 * Nonce ID for flushing a Memcache group
+	 *
+	 * @since 2.0.0
+	 *
+	 * @var string
+	 */
+    public $flush_group_nonce = 'jc-flush_group';
+
+	/**
+	 * Nonce ID for removing an item from Memcache
+	 *
+	 * @since 2.0.0
+	 *
+	 * @var string
+	 */
+    public $remove_item_nonce = 'jc-remove_item';
+
+	/**
+	 * Nonce ID for retrieving an item from Memcache
+	 *
+	 * @since 2.0.0
+	 *
+	 * @var string
+	 */
+    public $get_item_nonce = 'jc-get_item';
+
+	/**
+	 * The main constructor
+	 *
+	 * @since 2.0.0
+	 */
     public function __construct() {
 
 		// Setup the plugin URL, for enqueues
@@ -58,6 +111,32 @@ class JohnnyCache {
 		// Enqueue assets, not by hook unfortunately
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
     }
+
+	/**
+	 * Enqueue assets
+	 *
+	 * @since 2.0.0
+	 */
+	public function admin_enqueue() {
+
+		// Bail if not this page
+		if ( $GLOBALS['page_hook'] !== $this->hook ) {
+			return;
+		}
+
+		// Use thickboxes
+		add_thickbox();
+
+		// Enqueue
+        wp_enqueue_style( 'johnny-cache', $this->url . 'assets/css/johnny-cache.css', array(), $this->version );
+        wp_enqueue_script( 'johnny-cache', $this->url . 'assets/js/johnny-cache.js', array(), $this->version, true );
+
+		// Localize JS
+		wp_localize_script( 'johnny-cache', 'JohnnyCache', array(
+			'no_results'         => $this->get_no_results_row(),
+			'refreshing_results' => $this->get_refreshing_results_row()
+		) );
+	}
 
 	/**
 	 * Maybe clear a cache group, based on user request
@@ -211,7 +290,16 @@ class JohnnyCache {
         exit();
     }
 
-	public function clear_group( $group ) {
+	/**
+	 * Clear all of the items in a cache group
+	 *
+	 * @since 2.0.0
+	 *
+	 * @global WP_Object_cache $wp_object_cache
+	 * @param string $group
+	 * @return int
+	 */
+	public function clear_group( $group = '' ) {
 		global $wp_object_cache;
 
 		// Setup counter
@@ -242,32 +330,6 @@ class JohnnyCache {
 		$this->maybe_clear_cache_group( true );
 		$this->maybe_clear_user_cache( true );
     }
-
-	/**
-	 * Enqueue assets
-	 *
-	 * @since 2.0.0
-	 */
-	public function admin_enqueue() {
-
-		// Bail if not this page
-		if ( $GLOBALS['page_hook'] !== $this->hook ) {
-			return;
-		}
-
-		// Use thickboxes
-		add_thickbox();
-
-		// Enqueue
-        wp_enqueue_style( 'johnny-cache', $this->url . 'assets/css/johnny-cache.css', array(), $this->version );
-        wp_enqueue_script( 'johnny-cache', $this->url . 'assets/js/johnny-cache.js', array(), $this->version, true );
-
-		// Localize JS
-		wp_localize_script( 'johnny-cache', 'JohnnyCache', array(
-			'no_results'         => $this->get_no_results_row(),
-			'refreshing_results' => $this->get_refreshing_results_row()
-		) );
-	}
 
 	/**
 	 * Get all cache keys on a server
@@ -345,8 +407,8 @@ class JohnnyCache {
 			: $cache;
 
 		// Not found?
-		if ( false === $cache ) {
-			$cache = 'ERR';
+		if ( false === $value ) {
+			$value = 'ERR';
 		}
 
 		// Combine results
@@ -401,13 +463,14 @@ class JohnnyCache {
 	 * @return array
 	 */
 	private function get_keymaps( $server = '' ) {
+		global $wp_object_cache;
 
 		// Set an empty keymap array
 		$keymaps = array();
 		$offset  = 0;
 
 		// Offset by 1 if using cache-key salt
-		if ( defined( 'WP_CACHE_KEY_SALT' ) && ! empty( WP_CACHE_KEY_SALT ) ) {
+		if ( ! empty( $wp_object_cache->cache_key_salt ) ) {
 			$offset = 1;
 		}
 
@@ -534,91 +597,12 @@ class JohnnyCache {
 	}
 
 	/**
-	 * Output the Memcache server contents in a table
+	 * Output the WordPress admin page
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param string $server
+	 * @global WP_Object_cache $wp_object_cache
 	 */
-    public function do_instance( $server = '' ) {
-
-		// Setup the nonce
-		$flush_group_nonce = wp_create_nonce( $this->flush_group_nonce );
-
-		// Get server key map & output groups in rows
-		foreach ( $this->get_keymaps( $server ) as $values ) : ?>
-
-			<tr>
-				<th scope="row" class="check-column">
-					<input type="checkbox" name="checked[]" value="<?php echo esc_attr( $values['group'] ); ?>" id="checkbox_<?php echo esc_attr( $values['group'] ); ?>">
-					<label class="screen-reader-text" for="checkbox_<?php echo esc_attr( $values['group'] ); ?>"><?php esc_html_e( 'Select', 'johnny-cache' ); ?></label>
-				</th>
-				<td>
-					<code><?php echo esc_html( $values['blog_id'] ); ?></code>
-				</td>
-				<td>
-					<span class="row-title"><?php echo esc_html( $values['group'] ); ?></span>
-					<div class="row-actions"><span class="trash"><?php echo $this->get_flush_group_link( $values['blog_id'], $values['group'], $flush_group_nonce ); ?></span></div>
-				</td>
-				<td>
-					<?php echo $this->get_cache_key_links( $values['blog_id'], $values['group'], $values['keys'] ); ?>
-				</td>
-				<td>
-					<?php echo number_format_i18n( count( $values['keys'] ) ); ?>
-				</td>
-			</tr>
-
-		<?php endforeach;
-    }
-
-	/**
-	 * Maybe output a notice to the user that action has taken place
-	 *
-	 * @since 2.0.0
-	 */
-	public function notice() {
-
-		// Using cache key salt
-		if ( defined( 'WP_CACHE_KEY_SALT' ) && ! empty( WP_CACHE_KEY_SALT ) ) : ?>
-
-			<div id="message" class="notice notice-info">
-				<p><?php printf( esc_html__( 'Using cache-key salt: %s', 'johnny-cache' ), WP_CACHE_KEY_SALT ); ?></p>
-			</div>
-
-		<?php endif;
-
-		// Bail if no notice
-		if ( ! isset( $_GET['cache_cleared'] ) ) {
-			return;
-		}
-
-		// Cleared
-		$keys = isset( $_GET['keys_cleared'] )
-			? (int) $_GET['keys_cleared']
-			: 0;
-
-		// Cache
-		$cache = isset( $_GET['cache_cleared'] )
-			? $_GET['cache_cleared']
-			: 'none returned';
-
-		// Assemble the message
-		$message = sprintf(
-			esc_html__( 'Cleared %s keys from %s group(s).', 'johnny-cache' ),
-			'<strong>' . esc_html( $keys  ) . '</strong>',
-			'<strong>' . esc_html( $cache ) . '</strong>'
-		);
-
-		// Cache cleared
-		?>
-
-		<div id="message" class="notice notice-success">
-			<p><?php echo $message; ?></p>
-		</div>
-
-		<?php
-	}
-
     public function page() {
         global $wp_object_cache;
 
@@ -706,6 +690,58 @@ class JohnnyCache {
     }
 
 	/**
+	 * Output the Memcache server contents in a table
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param string $server
+	 */
+    public function do_rows( $server = '' ) {
+
+		// Setup the nonce
+		$flush_group_nonce = wp_create_nonce( $this->flush_group_nonce );
+
+		// Get server key map & output groups in rows
+		foreach ( $this->get_keymaps( $server ) as $values ) {
+			$this->do_row( $values, $flush_group_nonce );
+		}
+    }
+
+	/**
+	 * Output a table row based on values
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param  array   $values
+	 * @param  string  $flush_group_nonce
+	 */
+	private function do_row( $values = array(), $flush_group_nonce = '' ) {
+		?>
+
+		<tr>
+			<th scope="row" class="check-column">
+				<input type="checkbox" name="checked[]" value="<?php echo esc_attr( $values['group'] ); ?>" id="checkbox_<?php echo esc_attr( $values['group'] ); ?>">
+				<label class="screen-reader-text" for="checkbox_<?php echo esc_attr( $values['group'] ); ?>"><?php esc_html_e( 'Select', 'johnny-cache' ); ?></label>
+			</th>
+			<td>
+				<code><?php echo esc_html( $values['blog_id'] ); ?></code>
+			</td>
+			<td>
+				<span class="row-title"><?php echo esc_html( $values['group'] ); ?></span>
+				<div class="row-actions"><span class="trash"><?php echo $this->get_flush_group_link( $values['blog_id'], $values['group'], $flush_group_nonce ); ?></span></div>
+			</td>
+			<td>
+				<?php echo $this->get_cache_key_links( $values['blog_id'], $values['group'], $values['keys'] ); ?>
+			</td>
+			<td>
+				<?php echo number_format_i18n( count( $values['keys'] ) ); ?>
+			</td>
+		</tr>
+
+	<?php
+	}
+
+	/**
 	 * Returns a table row used to show no results were found
 	 *
 	 * @since 2.0.0
@@ -752,6 +788,55 @@ class JohnnyCache {
 		// Return the output buffer
 		return ob_get_clean();
 	}
+
+	/**
+	 * Maybe output a notice to the user that action has taken place
+	 *
+	 * @since 2.0.0
+	 */
+	public function notice() {
+
+		// Using cache key salt
+		if ( defined( 'WP_CACHE_KEY_SALT' ) && ! empty( WP_CACHE_KEY_SALT ) ) : ?>
+
+			<div id="message" class="notice notice-info">
+				<p><?php printf( esc_html__( 'Using cache-key salt: %s', 'johnny-cache' ), WP_CACHE_KEY_SALT ); ?></p>
+			</div>
+
+		<?php endif;
+
+		// Bail if no notice
+		if ( ! isset( $_GET['cache_cleared'] ) ) {
+			return;
+		}
+
+		// Cleared
+		$keys = isset( $_GET['keys_cleared'] )
+			? (int) $_GET['keys_cleared']
+			: 0;
+
+		// Cache
+		$cache = isset( $_GET['cache_cleared'] )
+			? $_GET['cache_cleared']
+			: 'none returned';
+
+		// Assemble the message
+		$message = sprintf(
+			esc_html__( 'Cleared %s keys from %s group(s).', 'johnny-cache' ),
+			'<strong>' . esc_html( $keys  ) . '</strong>',
+			'<strong>' . esc_html( $cache ) . '</strong>'
+		);
+
+		// Cache cleared
+		?>
+
+		<div id="message" class="notice notice-success">
+			<p><?php echo $message; ?></p>
+		</div>
+
+		<?php
+	}
 }
 
+// I focus on the pain. The only thing that's real.
 new JohnnyCache();
