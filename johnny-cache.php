@@ -18,7 +18,7 @@ class JohnnyCache {
 	 *
 	 * @var string
 	 */
-	private $url     = '';
+	private $url = '';
 
 	/**
 	 * The version used for assets
@@ -36,7 +36,7 @@ class JohnnyCache {
 	 *
 	 * @var string
 	 */
-    public $get_instance_nonce = 'jc-get_instance';
+	public $get_instance_nonce = 'jc-get_instance';
 
 	/**
 	 * Nonce ID for flushing a Memcache group
@@ -45,7 +45,7 @@ class JohnnyCache {
 	 *
 	 * @var string
 	 */
-    public $flush_group_nonce = 'jc-flush_group';
+	public $flush_group_nonce = 'jc-flush_group';
 
 	/**
 	 * Nonce ID for removing an item from Memcache
@@ -54,7 +54,7 @@ class JohnnyCache {
 	 *
 	 * @var string
 	 */
-    public $remove_item_nonce = 'jc-remove_item';
+	public $remove_item_nonce = 'jc-remove_item';
 
 	/**
 	 * Nonce ID for retrieving an item from Memcache
@@ -63,43 +63,43 @@ class JohnnyCache {
 	 *
 	 * @var string
 	 */
-    public $get_item_nonce = 'jc-get_item';
+	public $get_item_nonce = 'jc-get_item';
 
 	/**
 	 * The main constructor
 	 *
 	 * @since 2.0.0
 	 */
-    public function __construct() {
+	public function __construct() {
 
 		// Setup the plugin URL, for enqueues
 		$this->url = plugin_dir_url( __FILE__ );
 
 		// WP
-        add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 
 		// AJAX
-        add_action( 'wp_ajax_jc-get-item',     array( $this, 'ajax_get_mc_item'     ) );
-        add_action( 'wp_ajax_jc-get-instance', array( $this, 'ajax_get_mc_instance' ) );
-        add_action( 'wp_ajax_jc-flush-group',  array( $this, 'ajax_flush_mc_group'  ) );
-        add_action( 'wp_ajax_jc-remove-item',  array( $this, 'ajax_remove_mc_item'  ) );
+		add_action( 'wp_ajax_jc-get-item',     array( $this, 'ajax_get_mc_item'     ) );
+		add_action( 'wp_ajax_jc-get-instance', array( $this, 'ajax_get_mc_instance' ) );
+		add_action( 'wp_ajax_jc-flush-group',  array( $this, 'ajax_flush_mc_group'  ) );
+		add_action( 'wp_ajax_jc-remove-item',  array( $this, 'ajax_remove_mc_item'  ) );
 
 		// JC
 		add_action( 'johnny_cache_notice', array( $this, 'notice' ) );
-    }
+	}
 
 	/**
 	 * Add the top-level admin menu
 	 *
 	 * @since 2.0.0
 	 */
-    public function admin_menu() {
+	public function admin_menu() {
 
 		// Add menu page
-        $this->hook = add_menu_page(
+		$this->hook = add_menu_page(
 			esc_html__( 'Johnny Cache', 'johnny-cache' ),
 			esc_html__( 'Johnny Cache', 'johnny-cache' ),
-            'manage_cache', // Single-site admins and multi-site super admins
+			'manage_cache', // Single-site admins and multi-site super admins
 			'johnny-cache',
 			array( $this, 'page' ),
 			'dashicons-album'
@@ -109,8 +109,8 @@ class JohnnyCache {
 		add_action( "load-{$this->hook}", array( $this, 'load' ) );
 
 		// Enqueue assets, not by hook unfortunately
-        add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
-    }
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
+	}
 
 	/**
 	 * Enqueue assets
@@ -128,8 +128,8 @@ class JohnnyCache {
 		add_thickbox();
 
 		// Enqueue
-        wp_enqueue_style( 'johnny-cache', $this->url . 'assets/css/johnny-cache.css', array(), $this->version );
-        wp_enqueue_script( 'johnny-cache', $this->url . 'assets/js/johnny-cache.js', array(), $this->version, true );
+		wp_enqueue_style( 'johnny-cache', $this->url . 'assets/css/johnny-cache.css', array(), $this->version );
+		wp_enqueue_script( 'johnny-cache', $this->url . 'assets/js/johnny-cache.js', array(), $this->version, true );
 
 		// Localize JS
 		wp_localize_script( 'johnny-cache', 'JohnnyCache', array(
@@ -148,7 +148,7 @@ class JohnnyCache {
 	private function maybe_clear_cache_group( $redirect = true ) {
 
 		// Bail if not clearing
-        if ( empty( $_GET['cache_group'] ) ) {
+		if ( empty( $_GET['cache_group'] ) ) {
 			return;
 		}
 
@@ -219,9 +219,9 @@ class JohnnyCache {
 	 * @param string $nonce
 	 */
 	private function check_nonce( $nonce = '' ) {
-        check_ajax_referer( $nonce , 'nonce' );
+		check_ajax_referer( $nonce , 'nonce' );
 
-        nocache_headers();
+		nocache_headers();
 	}
 
 	/**
@@ -229,7 +229,7 @@ class JohnnyCache {
 	 *
 	 * @since 2.0.0
 	 */
-    public function ajax_get_mc_instance() {
+	public function ajax_get_mc_instance() {
 		$this->check_nonce( $this->get_instance_nonce );
 
 		// Attempt to output the server contents
@@ -237,15 +237,15 @@ class JohnnyCache {
 			$this->do_instance( $_POST['name'] );
 		}
 
-        exit();
-    }
+		exit();
+	}
 
 	/**
 	 * Delete all cache keys in a cache group
 	 *
 	 * @since 2.0.0
 	 */
-    public function ajax_flush_mc_group() {
+	public function ajax_flush_mc_group() {
 		$this->check_nonce( $this->flush_group_nonce );
 
 		// Loop through keys and attempt to delete them
@@ -255,15 +255,15 @@ class JohnnyCache {
 			}
 		}
 
-        exit();
-    }
+		exit();
+	}
 
 	/**
 	 * Delete a single cache key in a specific group
 	 *
 	 * @since 2.0.0
 	 */
-    public function ajax_remove_mc_item() {
+	public function ajax_remove_mc_item() {
 		$this->check_nonce( $this->remove_item_nonce );
 
 		// Delete a key in a group
@@ -271,15 +271,15 @@ class JohnnyCache {
 			wp_cache_delete( $_GET['key'], $_GET['group'] );
 		}
 
-        exit();
-    }
+		exit();
+	}
 
 	/**
 	 * Attempt to get a cached item
 	 *
 	 * @since 2.0.0
 	 */
-    public function ajax_get_mc_item() {
+	public function ajax_get_mc_item() {
 		$this->check_nonce( $this->get_item_nonce );
 
 		// Bail if invalid posted data
@@ -287,8 +287,8 @@ class JohnnyCache {
 			$this->do_item( $_GET['key'], $_GET['group'] );
 		}
 
-        exit();
-    }
+		exit();
+	}
 
 	/**
 	 * Clear all of the items in a cache group
@@ -326,10 +326,10 @@ class JohnnyCache {
 	 *
 	 * @since 2.0.0
 	 */
-    public function load() {
+	public function load() {
 		$this->maybe_clear_cache_group( true );
 		$this->maybe_clear_user_cache( true );
-    }
+	}
 
 	/**
 	 * Get all cache keys on a server
@@ -341,26 +341,26 @@ class JohnnyCache {
 	 *
 	 * @return array
 	 */
-    public function retrieve_keys( $server, $port = 11211 ) {
+	public function retrieve_keys( $server, $port = 11211 ) {
 
 		// Connect to Memcache
-        $memcache = new Memcache();
-        $memcache->connect( $server, $port );
+		$memcache = new Memcache();
+		$memcache->connect( $server, $port );
 
 		// Get slabs
-        $slabs = $memcache->getExtendedStats( 'slabs' );
+		$slabs = $memcache->getExtendedStats( 'slabs' );
 		$list  = array();
 
 		// Loop through servers to get slabs
-        foreach ( $slabs as $server => $slabs ) {
+		foreach ( $slabs as $server => $slabs ) {
 
 			// Loop through slabs to target single slabs
-            foreach ( array_keys( $slabs ) as $slab_id ) {
+			foreach ( array_keys( $slabs ) as $slab_id ) {
 
 				// Skip if slab ID is empty
-                if ( empty( $slab_id ) ) {
+				if ( empty( $slab_id ) ) {
 					continue;
-                }
+				}
 
 				// Get the entire slab
 				$cache_dump = $memcache->getExtendedStats( 'cachedump', (int) $slab_id );
@@ -378,12 +378,12 @@ class JohnnyCache {
 						$list[] = $k;
 					}
 				}
-            }
-        }
+			}
+		}
 
 		// Return the list of Memcache server slab keys
-        return $list;
-    }
+		return $list;
+	}
 
 	/**
 	 * Output the contents of a cached item into a textarea
@@ -393,16 +393,16 @@ class JohnnyCache {
 	 * @param  string  $key
 	 * @param  string  $group
 	 */
-    public function do_item( $key, $group ) {
+	public function do_item( $key, $group ) {
 
 		// Get results directly from Memcached
-        $cache   = wp_cache_get( $key, $group );
+		$cache   = wp_cache_get( $key, $group );
 		$full    = wp_cache_get_key( $key, $group );
 		$code    = wp_cache_get_result_code();
 		$message = wp_cache_get_result_message();
 
 		// @todo Something prettier with cached value
-        $value   = is_array( $cache ) || is_object( $cache )
+		$value   = is_array( $cache ) || is_object( $cache )
 			? serialize( $cache )
 			: $cache;
 
@@ -422,7 +422,7 @@ class JohnnyCache {
 		<textarea class="jc-item" class="widefat" rows="10" cols="35"><?php echo $results; ?></textarea>
 
 		<?php
-    }
+	}
 
 	/**
 	 * Output a link used to flush an entire cache group
@@ -548,8 +548,8 @@ class JohnnyCache {
 	private function get_cache_key_links( $blog_id = 0, $group = '', $keys = array() ) {
 
 		// Setup variables used in the loop
-        $remove_item_nonce = wp_create_nonce( $this->remove_item_nonce );
-        $get_item_nonce    = wp_create_nonce( $this->get_item_nonce    );
+		$remove_item_nonce = wp_create_nonce( $this->remove_item_nonce );
+		$get_item_nonce    = wp_create_nonce( $this->get_item_nonce    );
 		$admin_url         = admin_url( 'admin-ajax.php' );
 
 		// Start the output buffer
@@ -603,10 +603,10 @@ class JohnnyCache {
 	 *
 	 * @global WP_Object_cache $wp_object_cache
 	 */
-    public function page() {
-        global $wp_object_cache;
+	public function page() {
+		global $wp_object_cache;
 
-        $get_instance_nonce = wp_create_nonce( $this->get_instance_nonce ); ?>
+		$get_instance_nonce = wp_create_nonce( $this->get_instance_nonce ); ?>
 
 		<div class="wrap johnny-cache" id="jc-wrapper">
 			<h2><?php esc_html_e( 'Johnny Cache', 'johnny-cache' ); ?></h2>
@@ -687,7 +687,7 @@ class JohnnyCache {
 		</div>
 
 	<?php
-    }
+	}
 
 	/**
 	 * Output the Memcache server contents in a table
@@ -696,7 +696,7 @@ class JohnnyCache {
 	 *
 	 * @param string $server
 	 */
-    public function do_rows( $server = '' ) {
+	public function do_rows( $server = '' ) {
 
 		// Setup the nonce
 		$flush_group_nonce = wp_create_nonce( $this->flush_group_nonce );
@@ -705,7 +705,7 @@ class JohnnyCache {
 		foreach ( $this->get_keymaps( $server ) as $values ) {
 			$this->do_row( $values, $flush_group_nonce );
 		}
-    }
+	}
 
 	/**
 	 * Output a table row based on values
