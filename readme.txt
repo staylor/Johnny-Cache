@@ -2,8 +2,8 @@
 Contributors: wonderboymusic
 Tags: cache, Memcached, admin, Batcache, flush cache, manage cache, object cache, WP Object Cache
 Requires at least: 3.0
-Tested up to: 3.3
-Stable tag: 0.1
+Tested up to: 4.3
+Stable tag: 0.3
 
 Provides an admin interface for inspecting Memcached instances and flushing items by key or group in an AJAX fashion.
 
@@ -16,11 +16,14 @@ Provides an admin interface for inspecting Memcached instances and flushing item
 I'll be updating this plugin a lot soon.
 
 == Installation ==
-Activate the plugin. 
+Activate the plugin.
 
 You MUST install the PECL Memcached extension and have Ryan's Memcached WP Object Cache plugin installed for this work / not throw fatal errors everywhere - I'll make this smoother later.
 
 == Changelog ==
+
+= 0.3 =
+* Modernized some code
 
 = 0.1 =
 * Initial release
