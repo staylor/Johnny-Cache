@@ -636,8 +636,8 @@ class JohnnyCache {
 			<div id="jc-show-item"></div>
 
 			<div class="tablenav top">
-				<div class="alignleft action">
-					<?php // Bulk actions? ?>
+				<div class="alignleft actions bulkactions">
+					<?php echo $this->bulk_actions(); ?>
 				</div>
 				<div class="alignright">
 					<form action="<?php menu_page_url( 'johnny-cache' ) ?>" method="get">
@@ -687,6 +687,31 @@ class JohnnyCache {
 		</div>
 
 	<?php
+	}
+
+	/**
+	 * Return the bulk actions dropdown
+	 *
+	 * @since 2.0.0
+	 *
+	 * @return string
+	 */
+	private function bulk_actions() {
+
+		// Start an output buffer
+		ob_start(); ?>
+
+		<label for="bulk-action-selector-top" class="screen-reader-text"><?php esc_html_e( 'Select bulk action', 'johnny-cache' ); ?></label>
+		<select name="action" id="bulk-action-selector-top">
+			<option value="-1"><?php esc_html_e( 'Bulk Actions', 'johnny-cache' ); ?></option>
+			<option value="edit" class="hide-if-no-js"><?php esc_html_e( 'Flush Groups', 'johnny-cache' ); ?></option>
+		</select>
+		<input type="submit" id="doaction" class="button action" value="<?php esc_html_e( 'Apply', 'johnny-cache' ); ?>">
+
+		<?php
+
+		// Return the output buffer
+		return ob_get_clean();
 	}
 
 	/**
