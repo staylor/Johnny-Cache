@@ -185,10 +185,21 @@ class JohnnyCache {
 			return;
 		}
 
-		// Delete user caches
-		$_user = get_user_by( 'id', $_GET['user_id'] );
+		// How are we getting the user?
+		if ( is_numeric( $_GET['user_id'] ) ) {
+			$by = 'id';
+		} elseif ( is_email( $_GET['user_id'] ) ) {
+			$by = 'email';
+		} elseif ( is_string( $_GET['user_id'] ) ) {
+			$by = 'slug';
+		} else {
+			$by = 'login';
+		}
 
-		// Delete caches
+		// Get the user
+		$_user = get_user_by( $by, $_GET['user_id'] );
+
+		// Delete user caches
 		wp_cache_delete( $_GET['user_id'],      'users'      );
 		wp_cache_delete( $_GET['user_id'],      'user_meta'  );
 		wp_cache_delete( $_user->user_login,    'userlogins' );
@@ -560,22 +571,23 @@ class JohnnyCache {
 
 			// Get URL
 			$get_url = add_query_arg( array(
-				'action'  => 'jc-get-item',
-				'key'     => $key,
 				'blog_id' => $blog_id,
 				'group'   => $group,
+				'key'     => $key,
+				'action'  => 'jc-get-item',
 				'nonce'   => $get_item_nonce,
-				'width'    => 500,
-				'height'   => 500,
-				'inlineId' => 'jc-show-item'
-			), "{$admin_url}#TB_Inline" );
+			), $admin_url );
+
+			// Maybe include the blog ID in the group
+			$include_blog_id = ! empty( $blog_id )
+				? "{$blog_id}:{$group}"
+				: $group;
 
 			// Remove URL
 			$remove_url = add_query_arg( array(
-				'action'  => 'jc-remove-item',
+				'group'   => $include_blog_id,
 				'key'     => $key,
-				'blog_id' => $blog_id,
-				'group'   => $group,
+				'action'  => 'jc-remove-item',
 				'nonce'   => $remove_item_nonce
 			), $admin_url ); ?>
 

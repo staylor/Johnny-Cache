@@ -16,6 +16,7 @@
 			var row = $( el ).closest( 'tr' );
 
 			row.fadeOut( 500, function() {
+				$instanceStore.children( 'tr' ).removeClass( 'row-updating' );
 				row.remove();
 			} );
 		};
@@ -23,10 +24,11 @@
 
 	function remove_item( el ) {
 		return function () {
-			var p = $( el ).closest( 'p' );
+			var key = $( el ).closest( 'div.item' );
 
-			p.fadeOut( 500, function() {
-				p.remove();
+			key.fadeOut( 500, function() {
+				$instanceStore.children( 'tr' ).removeClass( 'row-updating' );
+				key.remove();
 			} );
 		};
 	}
@@ -117,10 +119,14 @@
 				return false;
 			} )
 			.on( 'click', '.jc-remove-item', function ( e ) {
+				var elem = $( e.currentTarget );
+
+				elem.parents( 'tr' ).addClass( 'row-updating' );
+
 				$.ajax( {
 					type    : 'post',
 					url     : e.currentTarget.href,
-					success : remove_item( e.currentTarget )
+					success : remove_item( elem[0] )
 				} );
 				return false;
 			} )
