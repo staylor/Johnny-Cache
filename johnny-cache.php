@@ -468,6 +468,14 @@ class JohnnyCache {
 	/**
 	 * Get the map of cache groups $ keys
 	 *
+	 * The keymap is limited to global keys and keys to the current site. This
+	 * is because cache keys are built inside the WP_Object_Cache class, and
+	 * are occasionally prefixed with the current blog ID, meaning we cannot
+	 * reliably ask the memcache server for data without a way to force the key.
+	 *
+	 * Maybe in a future version of WP_Object_Cache, a method to retrieve a raw
+	 * value based on a full cache key will exist. Until then, no bueno.
+	 *
 	 * @since 2.0.0
 	 *
 	 * @param  string $server
@@ -475,6 +483,9 @@ class JohnnyCache {
 	 */
 	private function get_keymaps( $server = '' ) {
 		global $wp_object_cache;
+
+		// Use current blog ID to limit keymap scope
+		$current_blog_id = get_current_blog_id();
 
 		// Set an empty keymap array
 		$keymaps = array();
@@ -512,6 +523,11 @@ class JohnnyCache {
 				$blog_id = 0;
 				$group   = $parts[ 0 ];
 				$global  = true;
+			}
+
+			// Only show global keys and keys for this site
+			if ( ! empty( $blog_id ) && ( $blog_id !== $current_blog_id ) ) {
+				continue;
 			}
 
 			// Build the cache key based on number of parts
@@ -637,7 +653,7 @@ class JohnnyCache {
 						<?php endforeach ?>
 
 					</select>
-					<button class="button action jc-refresh-instance"><?php esc_html_e( 'Refresh', 'johnny-cache' ); ?></button>
+					<button class="button action jc-refresh-instance" disabled><?php esc_html_e( 'Refresh', 'johnny-cache' ); ?></button>
 				</div>
 				<div class="jc-toolbar-primary search-form">
 					<label for="jc-search-input" class="screen-reader-text"><?php esc_html_e( 'Search Cache', 'johnny-cache' ); ?></label>
