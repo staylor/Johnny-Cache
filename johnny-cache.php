@@ -644,15 +644,18 @@ class JohnnyCache {
 			<div class="wp-filter">
 				<div class="jc-toolbar-secondary">
 					<select class="jc-server-selector" data-nonce="<?php echo $get_instance_nonce ?>">
-						<option value=""><?php esc_html_e( 'Select a Server', 'johnny-cache' ); ?></option>
+						<option value=""><?php esc_html_e( 'Select a Server', 'johnny-cache' ); ?></option><?php
 
-						<?php foreach ( $wp_object_cache->mc->getServerList() as $server ) : ?>
+						// Only loop if Memcached object exists
+						if ( ! empty( $wp_object_cache->mc ) ) :
+							foreach ( $wp_object_cache->mc->getServerList() as $server ) :
 
-							<option value="<?php echo esc_attr( $server['host'] ); ?>"><?php echo esc_html( $server['host'] ); ?></option>
+								?><option value="<?php echo esc_attr( $server['host'] ); ?>"><?php echo esc_html( $server['host'] ); ?></option><?php
 
-						<?php endforeach ?>
+							endforeach;
+						endif;
 
-					</select>
+					?></select>
 					<button class="button action jc-refresh-instance" disabled><?php esc_html_e( 'Refresh', 'johnny-cache' ); ?></button>
 				</div>
 				<div class="jc-toolbar-primary search-form">
