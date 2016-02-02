@@ -1,26 +1,33 @@
 === Johnny Cache ===
 Contributors: wonderboymusic
-Tags: cache, Memcached, admin, Batcache, flush cache, manage cache, object cache, WP Object Cache
-Requires at least: 3.0
-Tested up to: 3.3
-Stable tag: 0.1
-
-Provides an admin interface for inspecting Memcached instances and flushing items by key or group in an AJAX fashion.
+Tags: cache, Memcached, admin, flush cache, manage cache, object cache, WP Object Cache
+Requires at least: 4.0
+Tested up to: 4.5
+Stable tag: 2.0.0
 
 == Description ==
 
-*This is a beta release. If anything breaks, SORRY! Drop me a note to report a bug.*
-
-Provides an admin interface for inspecting Memcached instances and flushing items by key or group in an AJAX fashion. This should be considered a pre-release beta be-super-careful-when-using-type release.
-
-I'll be updating this plugin a lot soon.
+Provides an admin interface for inspecting Memcached instances, and flushing items (by key or group).
 
 == Installation ==
-Activate the plugin. 
 
-You MUST install the PECL Memcached extension and have Ryan's Memcached WP Object Cache plugin installed for this work / not throw fatal errors everywhere - I'll make this smoother later.
+* Install & configure the PECL Memcached extension
+* Install a Memcached Advanced Cache drop-in plugin
+* Activate this plugin
+* Visit the Johnny Cache page in /wp-admin/ to manage your caches
 
 == Changelog ==
+
+= 2.0.0 =
+* Refactor lots of code
+* Add table search
+* Improve styling
+* Improve AJAX handling
+* Remove singleton approach
+* Remove Memcached instance juggling from 0.3
+
+= 0.3 =
+* Modernized some code
 
 = 0.1 =
 * Initial release
